@@ -1,0 +1,19 @@
+# Node modules
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# Build files
+build/
+dist/
+
+# Environment variables
+.env
+
+# Temp files
+*.tmp
+*.temp
+.DS_Store
+.vercel
