@@ -1,4 +1,16 @@
 import mongoose from "mongoose";
+
+
+const soldSchema = new mongoose.Schema({
+  sold: {
+    type: Number,
+    default:0,
+    min: 0,
+  }
+},
+  {
+    timestamps: true}
+)
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -26,6 +38,9 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default:1,
     min: 1,
+  },
+  sold:{
+    type:[ soldSchema ],
   },
 },{
     timestamps:true

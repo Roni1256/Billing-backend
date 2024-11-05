@@ -84,19 +84,17 @@ export const addCustomer=async(req,res)=>{
         };
         isUser.customers.push(customerObject);
         for (const product of products) {
-            
-            console.log(isUser.products[0]._id.toString());            
             const productFound = isUser.products.find(prod => prod._id.toString() === product._id);
-            console.log(productFound);
-            
-            
             if (productFound) {
                 productFound.quantity -= Number(product.userquantity);
-                console.log(productFound.quantity);
-                
+                const newsold={
+                    sold:Number(product.userquantity),
+                }
+                productFound.sold.push(newsold);
                 await User.findOneAndUpdate(
                     { _id: id, "products._id": product._id },
-                    { $set: { "products.$.quantity": productFound.quantity } }
+                    { $set: { "products.$.quantity": productFound.quantity } },
+                    {$set: { "products.$.sold": productFound.sold } },
                 )
                 
             }
@@ -144,6 +142,17 @@ export const notifyCustomer=async(req,res)=>{
         
         customer_email.map(email=>sendNotify({email,subject,message}));
         return res.status(200).json({message:"Mail sent successfully"});
+    }catch(error){
+        return res.status(500).json({message:error.message});
+    }
+}
+
+export const getAllCustomers=async(req,res)=>{
+    const {id}=req.params;
+    try{
+        const isUser=await User.findById(id);
+        if(!isUser)return res.status(401).json({message:"User not found"});
+        return res.status(200).json(isUser.customers);
     }catch(error){
         return res.status(500).json({message:error.message});
     }
