@@ -1,17 +1,6 @@
 import User from "../models/user.model.js";
 import nodemailer from 'nodemailer';
-const transporter = nodemailer.createTransport({
-    host: 'gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
+
 
 const sendMail = async (options) => {
     const transporter = nodemailer.createTransport({
@@ -28,6 +17,7 @@ const sendMail = async (options) => {
         subject: "Billing App",
         html: `
             <h2>Your Bill Details</h2>
+            <p><strong>Invoice Number:</strong> ${options.invoice_number}</p>
             <p><strong>Total Items:</strong> ${options.totalItems}</p>
             <p><strong>Total Price:</strong> ${options.totalPrice}</p>
             <h3>Products:</h3>
@@ -49,18 +39,6 @@ const sendMail = async (options) => {
     await transporter.sendMail(mailOptions);
 };
 
-const sendNotify=async(options)=>{
-   
-    const mail={
-        from:process.env.SMTP_FROM,
-        to: options.email,
-        subject:options.subject,
-        text:options.message
-    };
-    await transporter.sendMail(mail)
-    .then(console.log("Mail Sent"))
-    .catch(console.error);
-}
 
 
 export const addCustomer=async(req,res)=>{
@@ -100,7 +78,7 @@ export const addCustomer=async(req,res)=>{
             }
         }        isUser.totalsales+=products.length
         if(email)
-            await sendMail({ email, totalPrice, totalItems , products });
+            await sendMail({ email, totalPrice, totalItems , products,invoice_number});
         await isUser.save();
         return res.status(201).json(isUser);
 
@@ -129,8 +107,36 @@ export const deleteCustomer=async(req,res)=>{
 
 
 export const notifyCustomer=async(req,res)=>{
-    const {subject,message}=req.body;
+    const {subject,message,title}=req.body;
     const {id}=req.params
+
+   
+    
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+        }
+    });
+    
+    const sendNotify = async ({ email, subject,title, message }) => {
+        const mailOptions = {
+            from: process.env.SMTP_FROM,
+            to: email,
+            subject: subject,
+            html: `
+            <h2>${title}</h2>
+            <p>${message}</p>
+            `
+        };
+    
+        await transporter.sendMail(mailOptions);
+    };
+    
+
+
+
     try{
         const isUser=await User.findById(id);
         if(!isUser)return res.status(401).json({message:"User not found"});
@@ -140,7 +146,7 @@ export const notifyCustomer=async(req,res)=>{
         }))];
         console.log(customer_email);
         
-        customer_email.map(email=>sendNotify({email,subject,message}));
+        customer_email.filter(email => email).forEach(async(email) => await sendNotify({email, title,subject, message}));
         return res.status(200).json({message:"Mail sent successfully"});
     }catch(error){
         return res.status(500).json({message:error.message});
