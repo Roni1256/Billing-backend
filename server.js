@@ -23,7 +23,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:true}))
 
 
-await mongoose.connect(process.env.MONGO_URI).then(() => {
+await mongoose.connect(String(process.env.MONGO_URI)).then(() => {
     console.log('Connected to MongoDB')
     app.listen(PORT, () => {
         console.log(`Server running on port ${process.env.PORT}`)   
