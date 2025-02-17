@@ -2,42 +2,42 @@ import User from "../models/user.model.js";
 import nodemailer from 'nodemailer';
 
 
-const sendMail = async (options) => {
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
-        }
-    });
+// const sendMail = async (options) => {
+//     const transporter = nodemailer.createTransport({
+//         service: 'gmail',
+//         auth: {
+//             user: process.env.SMTP_USER,
+//             pass: process.env.SMTP_PASS
+//         }
+//     });
 
-    const mailOptions = {
-        from: process.env.SMTP_FROM,
-        to: options.email,
-        subject: "Billing App",
-        html: `
-            <h2>Your Bill Details</h2>
-            <p><strong>Invoice Number:</strong> ${options.invoice_number}</p>
-            <p><strong>Total Items:</strong> ${options.totalItems}</p>
-            <p><strong>Total Price:</strong> ${options.totalPrice}</p>
-            <h3>Products:</h3>
-            <table style="width:100%; border-collapse: collapse;">
-                <tr style="background-color: #f2f2f2;">
-                    <th style="border: 1px solid #ddd; padding: 8px;">Product</th>
-                    <th style="border: 1px solid #ddd; padding: 8px;">Quantity</th>
-                    <th style="border: 1px solid #ddd; padding: 8px;">Price</th>
-                </tr>
-                ${options.products.map(product => `
-                    <tr>
-                        <td style="border: 1px solid #ddd; padding: 8px;">${product.name}</td>
-                        <td style="border: 1px solid #ddd; padding: 8px;">${product.userquantity}</td>
-                        <td style="border: 1px solid #ddd; padding: 8px;">${product.price}</td>
-                    </tr>
-                `).join('')}
-            </table>`
-    };
-    await transporter.sendMail(mailOptions);
-};
+//     const mailOptions = {
+//         from: process.env.SMTP_FROM,
+//         to: options.email,
+//         subject: "Billing App",
+//         html: `
+//             <h2>Your Bill Details</h2>
+//             <p><strong>Invoice Number:</strong> ${options.invoice_number}</p>
+//             <p><strong>Total Items:</strong> ${options.totalItems}</p>
+//             <p><strong>Total Price:</strong> ${options.totalPrice}</p>
+//             <h3>Products:</h3>
+//             <table style="width:100%; border-collapse: collapse;">
+//                 <tr style="background-color: #f2f2f2;">
+//                     <th style="border: 1px solid #ddd; padding: 8px;">Product</th>
+//                     <th style="border: 1px solid #ddd; padding: 8px;">Quantity</th>
+//                     <th style="border: 1px solid #ddd; padding: 8px;">Price</th>
+//                 </tr>
+//                 ${options.products.map(product => `
+//                     <tr>
+//                         <td style="border: 1px solid #ddd; padding: 8px;">${product.name}</td>
+//                         <td style="border: 1px solid #ddd; padding: 8px;">${product.userquantity}</td>
+//                         <td style="border: 1px solid #ddd; padding: 8px;">${product.price}</td>
+//                     </tr>
+//                 `).join('')}
+//             </table>`
+//     };
+//     await transporter.sendMail(mailOptions);
+// };
 
 
 
@@ -77,8 +77,7 @@ export const addCustomer=async(req,res)=>{
                 
             }
         }        isUser.totalsales+=products.length
-        if(email)
-            await sendMail({ email, totalPrice, totalItems , products,invoice_number});
+        
         await isUser.save();
         return res.status(201).json(isUser);
 
